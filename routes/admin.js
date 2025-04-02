@@ -11,6 +11,10 @@ router.get('/', function(req, res, next) {
 
 router.get('/login', function(req, res, next) {
 
+    if(!req.session.views) req.session.views = 0;
+    
+    
+
     res.render("admin/login");
 });
 router.get('/contacts', function(req, res, next) {
