@@ -3,9 +3,8 @@ var users = require('./../inc/users');
 var admin = require('./../inc/admin');
 var menus = require('./../inc/menus');
 var reservations = require('./../inc/reservations');
-
-
-console.log(reservations);
+var moment = require("moment");
+moment.locale("pt-BR")
 
 
 var router = express.Router();
@@ -152,7 +151,8 @@ router.get('/reservations', function(req, res, next) {
 
         res.render("admin/reservations",admin.getParams(req, {
             date:{},
-            data
+            data,
+            moment
         }));
 
     });
