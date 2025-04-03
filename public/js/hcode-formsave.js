@@ -28,8 +28,6 @@ HTMLFormElement.prototype.save = function() {
     
           });
 
-    })
+    });
 
-  
-    
 }
