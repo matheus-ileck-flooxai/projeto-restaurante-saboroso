@@ -2,11 +2,49 @@ class HcodeGrid{
 
     constructor(configs){
 
+        configs.listeners = Object.assign({
+            afterUpdateClick:(e)=>{
+  
+              $('#modal-update').modal('show');
+  
+  
+            },
+            afterDeleteClick:(e)=>{
+  
+              window.location.reload();
+
+  
+  
+            },
+            afterFormCreate:(e)=>{
+
+              window.location.reload();
+
+            },
+            afterFormUpdate:(e)=>{
+
+              window.location.reload();
+
+            },
+            afterFormCreateError:(e)=>{
+
+              alert('Não foi possivel enviar o formulario');
+            },
+            afterFormUpdateError:(e)=>{
+
+              alert('Não foi possivel enviar o formulario');
+            }
+            
+        }, configs.listeners)
+
         this.options = Object.assign({}, { 
             formCreate:'#modal-create form',
             formUpdate:'#modal-update form',
             btnUpdate:'.btn-update',
             btnDelete:'.btn-delete',
+            listeners: {
+            
+            }
         },configs);
 
         this.initForms();
@@ -15,36 +53,43 @@ class HcodeGrid{
 
 
     }
+    fireEvent(name, args){
+
+      if(typeof this.options.listeners[name] === 'function')this.options.listeners[name].apply(this,args);
+
+    }
+
+    getTrData(e){
+
+        let tr = e.composedPath().find(el=>{
+        
+          return (el.tagName.toUpperCase() === 'TR');
+
+        });
+        
+        return JSON.parse(tr.dataset.row)
+    }
+
     initForms(){
 
         this.formCreate = document.querySelector(this.options.formCreate);
       
-    
         this.formCreate.save().then(json=>{
-  
-          window.location.reload();
-  
-  
-  
-  
+          this.fireEvent('afterFormCreate');
         }).catch(err=>{
   
+          this.fireEvent('afterFormCreateError')
           console.log(err);
-          
-  
         });
   
         
         this.formUpdate = document.querySelector(this.options.formUpdate);
-        
         this.formUpdate.save().then(json=>{
-  
-        window.location.reload();
-  
-  
+        this.fireEvent('afterFormUpdate');
         }).catch(err=>{
-  
-        console.log(err);
+          this.fireEvent('afterFormUpdateError')
+
+          console.log(err);
   
   
         });
@@ -55,13 +100,10 @@ class HcodeGrid{
   
             btn.addEventListener('click', e=>{
       
-              let tr = e.composedPath().find(el=>{
-      
-                return (el.tagName.toUpperCase() === 'TR');
-      
-              });
-              
-              let data = JSON.parse(tr.dataset.row)
+              this.fireEvent('beforeUpdateClick',[e]);
+
+              let data = this.getTrData(e);
+
       
               for (let name in data){
       
@@ -75,30 +117,24 @@ class HcodeGrid{
                   break;
       
                   default:
-                  if(input) input.value = data[name];
-      
-      
-      
+                  if(input) input.value = data[name];     
                 }
       
       
               }  
               
-              $('#modal-update').modal('show');
+              this.fireEvent('afterUpdateClick',[e]);
+
             });
       
           });
       
           [...document.querySelectorAll(this.options.btnDelete)].forEach(btn => {
               btn.addEventListener('click', e=>{
+                this.fireEvent('beforeDeleteClick',[e]);
       
-                let tr = e.composedPath().find(el=>{
-      
-                return (el.tagName.toUpperCase() === 'TR');
-      
-                });
-      
-                let data = JSON.parse(tr.dataset.row);
+                let data = this.getTrData(e);
+
       
                 if(confirm(eval('`'+ this.options.deleteMsg  + '`'))){
       
@@ -110,18 +146,14 @@ class HcodeGrid{
                 .then(response =>  response.json())
                 .then(json =>{
       
-                  window.location.reload();
+
+                  this.fireEvent('afterDeleteClick',[e]);
       
                   
                 });
                 
               }
-      
-              })
-      
-            });
-
+           })
+        });
+      }
     }
- 
-
-}
